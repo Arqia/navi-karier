@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NaviKarier — Dari tebakan jadi data.</title>
+<meta name="description" content="AI-powered skill gap analyzer untuk job seekers Indonesia. Hitung gap skill kamu vs standar industri secara matematis dalam 5 menit." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000;
+    --bg-2: #0a0a0a;
+    --bg-card: #0f0f0f;
+    --bg-light: #f0f0f0;
+    --ink: #fff;
+    --ink-2: #888;
+    --ink-3: #555;
+    --ink-dark: #111;
+    --accent: #3b82f6;
+    --highlight: #d1f542;
+    --border: rgba(255,255,255,0.08);
+    --border-2: rgba(255,255,255,0.14);
+    --red: #ef4444;
+    --green: #22c55e;
+    --amber: #eab308;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --max: 1400px;
+    --pad: clamp(24px, 5vw, 64px);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--bg);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  ::selection { background: var(--highlight); color: #000; }
+
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
+
+  /* NAV */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: var(--max); margin: 0 auto; padding: 0 var(--pad);
+    display: flex; align-items: center; justify-content: space-between; height: 60px;
+  }
+  .logo { font-weight: 800; font-size: 1.15rem; letter-spacing: -0.03em; }
+  .nav-links { display: flex; gap: 0; list-style: none; margin: 0; padding: 0; }
+  .nav-links li { border-left: 1px solid var(--border-2); }
+  .nav-links li:last-child { border-right: 1px solid var(--border-2); }
+  .nav-links a {
+    display: block; padding: 8px 20px; font-size: 0.88rem; color: var(--ink-2);
+    transition: color 150ms;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-right { display: flex; gap: 0; }
+  .nav-btn {
+    padding: 8px 20px; font-size: 0.88rem; font-weight: 500;
+    border: 1px solid var(--border-2); transition: all 150ms;
+  }
+  .nav-btn:hover { border-color: var(--ink-3); }
+  .nav-btn.filled { background: var(--ink); color: #000; border-color: var(--ink); }
+  .nav-btn.filled:hover { background: #ddd; }
+  .nav-toggle { display: none; }
+
+  @media (max-width: 880px) {
+    .nav-links, .nav-right { display: none; }
+    .nav-toggle {
+      display: flex; width: 36px; height: 36px;
+      align-items: center; justify-content: center;
+    }
+    .nav-toggle span {
+      width: 18px; height: 1.5px; background: var(--ink); position: relative;
+    }
+    .nav-toggle span::before, .nav-toggle span::after {
+      content: ""; position: absolute; width: 18px; height: 1.5px;
+      background: var(--ink); left: 0;
+    }
+    .nav-toggle span::before { top: -6px; }
+    .nav-toggle span::after { top: 6px; }
+    .nav-drawer {
+      display: none; flex-direction: column; gap: 0; padding: 0 var(--pad) 24px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a { padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; color: var(--ink-2); }
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 0 80px; position: relative; overflow: hidden;
+  }
+  .hero-noise {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 256px; pointer-events: none; opacity: 0.6;
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+  .hero-headline {
+    font-size: clamp(3rem, 8vw, 6rem); font-weight: 800;
+    line-height: 1.0; letter-spacing: -0.04em; margin: 0 0 28px; max-width: 900px;
+  }
+  .hero-sub {
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem); color: var(--ink-2);
+    max-width: 550px; margin: 0 0 48px; line-height: 1.6;
+  }
+  .hero-ctas { display: flex; gap: 0; }
+  .hero-btn {
+    padding: 14px 28px; font-size: 0.95rem; font-weight: 500;
+    border: 1px solid var(--border-2); transition: all 200ms;
+  }
+  .hero-btn.primary { background: var(--ink); color: #000; border-color: var(--ink); }
+  .hero-btn.primary:hover { background: #ddd; }
+  .hero-btn.ghost { color: var(--ink); }
+  .hero-btn.ghost:hover { border-color: var(--ink-3); background: rgba(255,255,255,0.04); }
+
+  /* LOGOS */
+  .logos-bar {
+    padding: 48px 0; border-bottom: 1px solid var(--border);
+  }
+  .logos-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 32px; flex-wrap: wrap;
+  }
+  .logos-row span {
+    font-size: 0.95rem; font-weight: 600; color: var(--ink-3);
+    letter-spacing: -0.01em; white-space: nowrap;
+  }
+
+  /* SECTIONS */
+  section { scroll-margin-top: 70px; }
+  .sec { padding: clamp(100px, 14vw, 180px) 0; position: relative; }
+  .sec + .sec { border-top: 1px solid var(--border); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 0.75rem; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 8px 16px; border: 1px solid var(--border-2);
+    margin-bottom: 32px;
+  }
+  .badge-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .sec-headline {
+    font-size: clamp(2rem, 5.5vw, 3.8rem); font-weight: 800;
+    line-height: 1.08; letter-spacing: -0.03em; margin: 0 0 24px;
+    max-width: 800px;
+  }
+  .hl { background: var(--highlight); color: #000; padding: 0 6px; }
+  .sec-sub {
+    font-size: 1.05rem; color: var(--ink-2); max-width: 580px;
+    line-height: 1.7; margin: 0;
+  }
+
+  /* SPLIT */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  @media (max-width: 880px) { .split { grid-template-columns: 1fr; gap: 40px; } }
+
+  /* CARDS */
+  .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 64px; }
+  @media (max-width: 880px) { .cards-3 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--bg-card); padding: 32px; border: 1px solid var(--border);
+    transition: border-color 250ms;
+  }
+  .card:hover { border-color: var(--border-2); }
+  .card h3 { font-size: 0.95rem; font-weight: 600; margin: 0 0 8px; }
+  .card h3 b { font-weight: 700; }
+  .card p { color: var(--ink-2); font-size: 0.9rem; margin: 0; line-height: 1.6; }
+
+  /* FEATURES ROW (light) */
+  .sec-light { background: var(--bg-light); color: var(--ink-dark); }
+  .sec-light .sec-sub { color: #555; }
+  .features-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; margin-top: 80px;
+  }
+  @media (max-width: 960px) { .features-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .features-row { grid-template-columns: 1fr; } }
+  .feat-icon {
+    width: 80px; height: 80px; margin-bottom: 24px;
+    border: 1px dashed #ccc; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: #999;
+  }
+  .feat h4 { font-size: 1.05rem; font-weight: 700; margin: 0 0 8px; }
+  .feat p { font-size: 0.9rem; color: #555; margin: 0; line-height: 1.6; }
+
+  /* WIDGET */
+  .widget-wrap { margin-top: 64px; border: 1px solid var(--border); background: var(--bg-card); }
+  .widget-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 28px 32px; border-bottom: 1px solid var(--border); gap: 16px;
+  }
+  .widget-score { font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  .widget-score sup { font-size: 1rem; color: var(--ink-3); font-weight: 400; }
+  .widget-status { font-size: 0.85rem; color: var(--ink-2); text-align: right; }
+  .widget-body { padding: 0 32px 32px; }
+
+  .skill-row { padding: 16px 0; border-bottom: 1px solid var(--border); }
+  .skill-row:last-child { border-bottom: 0; }
+  .skill-meta { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
+  .skill-name { font-weight: 500; font-size: 0.9rem; }
+  .skill-nums { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-3); }
+  .skill-track {
+    position: relative; height: 32px; background: rgba(255,255,255,0.06);
+    border-radius: 0; cursor: pointer; touch-action: none;
+  }
+  .skill-fill { position: absolute; top: 0; left: 0; bottom: 0; transition: background 240ms; }
+  .skill-threshold { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--ink); opacity: 0.2; }
+  .skill-handle {
+    position: absolute; top: 50%; transform: translate(-50%,-50%);
+    width: 16px; height: 32px; background: var(--ink); cursor: grab; z-index: 2;
+  }
+  .skill-handle:active { cursor: grabbing; }
+  .skill-handle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .skill-gap {
+    display: flex; justify-content: flex-end; margin-top: 6px;
+    font-family: var(--mono); font-size: 0.7rem; color: var(--ink-3); letter-spacing: 0.08em;
+  }
+  .skill-gap b { color: var(--ink); font-weight: 500; margin-left: 4px; }
+  .skill-row[data-met="true"] .skill-fill { background: var(--green); }
+  .skill-row[data-met="medium"] .skill-fill { background: var(--amber); }
+  .skill-row[data-met="false"] .skill-fill { background: var(--red); }
+
+  @media (max-width: 600px) {
+    .skill-track { height: 40px; }
+    .skill-handle { width: 20px; height: 40px; }
+  }
+
+  /* DEMO */
+  .demo { border: 1px solid var(--border); background: var(--bg-card); margin-top: 64px; }
+  .demo-head {
+    padding: 20px 28px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  }
+  .demo-head h3 { font-size: 1rem; font-weight: 600; margin: 0; }
+  .demo-body { display: grid; grid-template-columns: 240px 1fr; min-height: 440px; }
+  @media (max-width: 880px) { .demo-body { grid-template-columns: 1fr; } }
+  .demo-aside {
+    padding: 20px; border-right: 1px solid var(--border); background: rgba(255,255,255,0.02);
+  }
+  @media (max-width: 880px) { .demo-aside { border-right: 0; border-bottom: 1px solid var(--border); } }
+  .demo-aside h4 {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+    color: var(--ink-3); text-transform: uppercase; margin: 0 0 10px;
+  }
+  .role-list { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+  .role-list button {
+    width: 100%; text-align: left; padding: 8px 10px; font-size: 0.85rem;
+    color: var(--ink-2); transition: all 150ms;
+  }
+  .role-list button:hover { color: var(--ink); background: rgba(255,255,255,0.04); }
+  .role-list button.active { background: var(--ink); color: #000; }
+  .demo-main { padding: 24px; }
+  .demo-result-head {
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+    padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .demo-score { font-size: 2.4rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  .demo-score-label {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+    color: var(--ink-3); text-transform: uppercase; margin-bottom: 4px; display: block;
+  }
+  .demo-skill { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .demo-skill:last-child { border-bottom: 0; }
+  .demo-skill-head { display: flex; justify-content: space-between; margin-bottom: 6px; gap: 12px; }
+  .demo-skill-name { font-size: 0.85rem; }
+  .demo-skill-vals { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-3); }
+  .demo-skill-bar { height: 4px; background: rgba(255,255,255,0.06); }
+  .demo-skill-fill { height: 100%; background: var(--red); transition: width 600ms cubic-bezier(.2,.7,.2,1), background 240ms; }
+  .demo-skill[data-met="true"] .demo-skill-fill { background: var(--green); }
+  .demo-skill[data-met="medium"] .demo-skill-fill { background: var(--amber); }
+  .level-pick { display: flex; gap: 1px; margin-bottom: 16px; }
+  .level-pick button {
+    font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 6px 10px; border: 1px solid var(--border-2);
+    color: var(--ink-3); transition: all 150ms;
+  }
+  .level-pick button.active { background: var(--ink); color: #000; border-color: var(--ink); }
+
+  /* IMPACT */
+  .impact-flow-wrap {
+    margin-top: 48px; padding: 32px; border: 1px solid var(--border); background: var(--bg-card);
+  }
+  .impact-flow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; flex-wrap: wrap; margin-top: 16px;
+  }
+  .impact-flow-item {
+    padding: 8px 14px; font-size: 0.82rem; font-weight: 500;
+    border: 1px solid var(--border-2); color: var(--ink-2);
+  }
+  .impact-flow-item.active { background: var(--highlight); color: #000; border-color: var(--highlight); }
+  .impact-flow-arrow { color: var(--ink-3); font-size: 0.9rem; }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 64px; }
+  @media (max-width: 960px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .price-card {
+    background: var(--bg-card); border: 1px solid var(--border); padding: 32px;
+    display: flex; flex-direction: column; position: relative; transition: border-color 250ms;
+  }
+  .price-card:hover { border-color: var(--border-2); }
+  .price-card.featured { border-color: var(--highlight); }
+  .price-badge {
+    position: absolute; top: -11px; left: 24px;
+    background: var(--highlight); color: #000; padding: 4px 12px;
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .price-name { font-size: 1.1rem; font-weight: 600; margin: 0 0 16px; }
+  .price-amount { font-size: 2.2rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  .price-per { color: var(--ink-3); font-size: 0.85rem; margin-left: 4px; }
+  .price-list {
+    list-style: none; margin: 24px 0; padding: 0;
+    display: flex; flex-direction: column; gap: 10px; flex: 1;
+  }
+  .price-list li { font-size: 0.88rem; color: var(--ink-2); padding-left: 16px; position: relative; }
+  .price-list li::before {
+    content: ""; position: absolute; left: 0; top: 8px;
+    width: 4px; height: 4px; background: var(--ink-3); border-radius: 50%;
+  }
+  .price-card .cta-btn { width: 100%; text-align: center; padding: 12px; font-weight: 500; font-size: 0.9rem; border: 1px solid var(--border-2); transition: all 200ms; display: block; }
+  .price-card .cta-btn:hover { border-color: var(--ink-3); }
+  .price-card .cta-btn.filled { background: var(--ink); color: #000; border-color: var(--ink); }
+  .price-card .cta-btn.filled:hover { background: #ddd; }
+
+  /* FAQ */
+  .faq-list { max-width: 800px; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    width: 100%; text-align: left; padding: 20px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 1rem; font-weight: 500; gap: 24px; transition: color 150ms;
+  }
+  .faq-q:hover { color: var(--ink-2); }
+  .faq-plus { font-size: 1.2rem; color: var(--ink-3); flex-shrink: 0; transition: transform 250ms; }
+  .faq-item.open .faq-plus { transform: rotate(45deg); }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height 320ms cubic-bezier(.2,.7,.2,1); }
+  .faq-a-inner { padding: 0 0 24px; color: var(--ink-2); font-size: 0.92rem; max-width: 700px; line-height: 1.7; }
+
+  /* CONTACT */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: clamp(32px, 5vw, 64px); }
+  @media (max-width: 880px) { .contact-grid { grid-template-columns: 1fr; } }
+  .contact-info h3 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; margin: 12px 0 16px; letter-spacing: -0.02em; }
+  .contact-info p { color: var(--ink-2); font-size: 0.92rem; margin: 0 0 32px; }
+  .contact-list { list-style: none; margin: 0 0 24px; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+  .contact-list li { display: flex; flex-direction: column; gap: 4px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .contact-list .label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+  .contact-list .val { font-size: 0.92rem; color: var(--ink-2); }
+  .contact-list .val a:hover { color: var(--ink); }
+  .form { border: 1px solid var(--border); background: var(--bg-card); padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.8rem; font-weight: 500; color: var(--ink-2); }
+  .field input, .field select, .field textarea {
+    font: inherit; font-size: 0.88rem; background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-2); padding: 10px 12px; color: var(--ink); transition: border-color 180ms;
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--ink-3); }
+  .form-submit {
+    align-self: flex-start; padding: 10px 24px; font-weight: 500; font-size: 0.88rem;
+    background: var(--ink); color: #000; border: 1px solid var(--ink); cursor: pointer; transition: all 200ms;
+  }
+  .form-submit:hover { background: #ddd; }
+  .form-status { font-family: var(--mono); font-size: 0.72rem; color: var(--green); min-height: 1em; }
+
+  /* CTA BOTTOM */
+  .cta-bottom {
+    padding: 200px 0 100px; position: relative; overflow: hidden; text-align: center;
+  }
+  .cta-glow {
+    position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* FOOTER */
+  .footer { border-top: 1px solid var(--border); padding: 56px 0 28px; }
+  .footer-grid {
+    display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 32px; margin-bottom: 40px;
+  }
+  @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+  .footer-brand .tagline { color: var(--ink-3); margin-top: 8px; font-size: 0.88rem; font-style: italic; }
+  .footer-brand .copy { color: var(--ink-3); font-size: 0.8rem; margin-top: 12px; }
+  .footer-col h5 { font-size: 0.85rem; font-weight: 600; margin: 0 0 14px; }
+  .footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { font-size: 0.88rem; color: var(--ink-2); transition: color 150ms; }
+  .footer-col a:hover { color: var(--ink); }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 500ms, transform 500ms cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="logo">NaviKarier</a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#features">Fitur</a></li>
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#dampak">Dampak</a></li>
+        <li><a href="#pricing">Harga</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </nav>
+    <div class="nav-right">
+      <a href="#contact" class="nav-btn">Kontak</a>
+      <a href="#demo" class="nav-btn filled">Mulai Gratis</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span></button>
+  </div>
+  <div class="nav-drawer" id="navDrawer">
+    <a href="#features">Fitur</a><a href="#demo">Demo</a><a href="#dampak">Dampak</a>
+    <a href="#pricing">Harga</a><a href="#faq">FAQ</a><a href="#contact">Kontak</a>
+  </div>
+</header>
+
+<section id="hero" class="hero">
+  <div class="hero-noise"></div>
+  <div class="wrap">
+    <h1 class="hero-headline reveal">Dari tebakan<br>jadi data.</h1>
+    <p class="hero-sub reveal">NaviKarier menghitung gap antara skill kamu dan standar industri &mdash; matematis, bukan tebakan. Dalam 5 menit kamu tahu harus fokus kemana.</p>
+    <div class="hero-ctas reveal">
+      <a href="#demo" class="hero-btn primary">Analisa Sekarang</a>
+      <a href="#features" class="hero-btn ghost">Pelajari Lebih &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<div class="logos-bar">
+  <div class="wrap">
+    <div class="logos-row reveal">
+      <span>7,46jt pengangguran</span>
+      <span>51,5% underqualified</span>
+      <span>12 roles tersedia</span>
+      <span>5 menit analisis</span>
+      <span>Data BPS 2024</span>
+    </div>
+  </div>
+</div>
+
+<section id="features" class="sec">
+  <div class="wrap">
+    <div class="split">
+      <div class="reveal">
+        <div class="badge"><span class="badge-dot" style="background:var(--green)"></span> SKILL GAP ANALYZER</div>
+        <h2 class="sec-headline">Hitung skill gap kamu secara matematis. Bukan tebakan, bukan <span class="hl">AI black-box.</span></h2>
+      </div>
+      <div class="reveal" style="padding-top:48px;">
+        <p class="sec-sub">Upload CV atau input skill manual. Sistem menghitung gap vs standar industri menggunakan taxonomy yang dikurasi dari ribuan job listing Indonesia.</p>
+      </div>
+    </div>
+    <div class="cards-3 reveal">
+      <div class="card">
+        <h3><b>Skill Gap Analysis.</b> Upload CV atau input manual. Gap dihitung per-skill vs standar industri.</h3>
+      </div>
+      <div class="card">
+        <h3><b>Learning Path.</b> Roadmap belajar diprioritaskan by impact &mdash; bukan popularitas course.</h3>
+      </div>
+      <div class="card">
+        <h3><b>Industry Benchmark.</b> Data 12 role, 5+ industri, dikurasi dari job listings real Indonesia.</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="demo" class="sec">
+  <div class="wrap">
+    <div class="split">
+      <div class="reveal">
+        <div class="badge"><span class="badge-dot" style="background:var(--accent)"></span> LIVE DEMO</div>
+        <h2 class="sec-headline">Coba sendiri. Pilih role, lihat <span class="hl">gap-mu.</span></h2>
+      </div>
+      <div class="reveal" style="padding-top:48px;">
+        <p class="sec-sub">100% berjalan di browser. Tidak ada data yang dikirim ke server manapun.</p>
+      </div>
+    </div>
+    <div class="demo reveal">
+      <div class="demo-head">
+        <h3>Skill Gap Analyzer</h3>
+        <span style="font-family:var(--mono);font-size:0.68rem;color:var(--ink-3);letter-spacing:0.08em;text-transform:uppercase;">Client-side only</span>
+      </div>
+      <div class="demo-body">
+        <aside class="demo-aside">
+          <h4>Role</h4>
+          <ul class="role-list" id="roleList"></ul>
+          <h4>Level</h4>
+          <div class="level-pick" id="levelPick">
+            <button class="active" data-level="junior">Junior</button>
+            <button data-level="mid">Mid</button>
+            <button data-level="senior">Senior</button>
+          </div>
+        </aside>
+        <div class="demo-main">
+          <div class="demo-result-head">
+            <div>
+              <span class="demo-score-label">Readiness Score</span>
+              <div class="demo-score"><span id="demoScore">0</span><sup style="font-size:0.9rem;color:var(--ink-3)">%</sup></div>
+            </div>
+            <div style="font-family:var(--mono);font-size:0.7rem;color:var(--ink-3);letter-spacing:0.06em;text-transform:uppercase;" id="demoVerdict">menghitung...</div>
+          </div>
+          <div id="demoSkills"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dampak" class="sec sec-light">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center;">
+      <div class="badge" style="border-color:rgba(0,0,0,0.1);color:var(--ink-dark);"><span class="badge-dot" style="background:var(--green)"></span> DAMPAK EKONOMI</div>
+      <h2 class="sec-headline" style="max-width:900px;margin:0 auto 24px;">Skill gap bukan masalah personal. Ini masalah ekonomi &mdash; dan <span class="hl">ada solusinya.</span></h2>
+      <p class="sec-sub" style="margin:0 auto;">Data BPS dan Bank Indonesia menunjukkan korelasi langsung antara kesiapan skill dan pertumbuhan ekonomi nasional.</p>
+    </div>
+    <div class="features-row reveal">
+      <div class="feat">
+        <div class="feat-icon">&#x2693;</div>
+        <h4>7,46 juta pengangguran</h4>
+        <p>Mayoritas karena mismatch skill vs kebutuhan industri (BPS, Feb 2024).</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">&#x26A0;</div>
+        <h4>51,5% underqualified</h4>
+        <p>Pelamar tidak memenuhi kualifikasi minimum posisi yang dilamar.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">&#x274C;</div>
+        <h4>Rp 142T PDB hilang</h4>
+        <p>Estimasi kerugian ekonomi tahunan akibat produktivitas tidak optimal.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">&#x2705;</div>
+        <h4>Solusi: upskilling terarah</h4>
+        <p>Identifikasi gap &rarr; belajar tepat sasaran &rarr; employability naik.</p>
+      </div>
+    </div>
+    <div class="impact-flow-wrap reveal" style="border-color:rgba(0,0,0,0.1);background:rgba(0,0,0,0.03);">
+      <div style="font-family:var(--mono);font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#555;text-align:center;">Logika Dampak &mdash; Mandat BI &amp; OJK</div>
+      <div class="impact-flow">
+        <span class="impact-flow-item active" style="border-color:var(--highlight);">Identifikasi Gap</span>
+        <span class="impact-flow-arrow">&rarr;</span>
+        <span class="impact-flow-item" style="border-color:rgba(0,0,0,0.1);color:#555;">Upskilling Terarah</span>
+        <span class="impact-flow-arrow" style="color:#999;">&rarr;</span>
+        <span class="impact-flow-item" style="border-color:rgba(0,0,0,0.1);color:#555;">Employability Naik</span>
+        <span class="impact-flow-arrow" style="color:#999;">&rarr;</span>
+        <span class="impact-flow-item" style="border-color:rgba(0,0,0,0.1);color:#555;">Pendapatan Meningkat</span>
+        <span class="impact-flow-arrow" style="color:#999;">&rarr;</span>
+        <span class="impact-flow-item active" style="border-color:var(--highlight);">Literasi Keuangan</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" class="sec">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center;max-width:700px;margin:0 auto 0;">
+      <div class="badge"><span class="badge-dot" style="background:var(--amber)"></span> HARGA</div>
+      <h2 class="sec-headline" style="margin:0 auto 24px;">Mulai gratis. <span class="hl">Upgrade saat siap.</span></h2>
+      <p class="sec-sub" style="margin:0 auto;">Tidak ada free-trial palsu yang minta kartu kredit.</p>
+    </div>
+    <div class="pricing-grid reveal">
+      <article class="price-card">
+        <h3 class="price-name">Free</h3>
+        <div><span class="price-amount">Rp 0</span><span class="price-per">/ bulan</span></div>
+        <ul class="price-list">
+          <li>1&times; analisis per bulan</li><li>5 cluster industri</li>
+          <li>Learning path dasar</li><li>Community support</li>
+        </ul>
+        <a href="#demo" class="cta-btn">Mulai Gratis</a>
+      </article>
+      <article class="price-card featured" style="position:relative;">
+        <span class="price-badge">Populer</span>
+        <h3 class="price-name">Pro</h3>
+        <div><span class="price-amount">Rp 49k</span><span class="price-per">/ bulan</span></div>
+        <ul class="price-list">
+          <li>Unlimited analisis</li><li>Semua industri + roles</li>
+          <li>Learning path detail</li><li>CV upload &amp; parsing</li><li>Priority support</li>
+        </ul>
+        <a href="#contact" class="cta-btn filled">Coba 14 Hari Gratis</a>
+      </article>
+      <article class="price-card">
+        <h3 class="price-name">Enterprise</h3>
+        <div><span class="price-amount">Custom</span></div>
+        <ul class="price-list">
+          <li>Untuk perusahaan / kampus</li><li>Bulk analisis</li>
+          <li>Dashboard admin</li><li>API access</li><li>White-label option</li>
+        </ul>
+        <a href="#contact" class="cta-btn">Hubungi Kami</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="sec">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="badge"><span class="badge-dot" style="background:var(--ink-3)"></span> FAQ</div>
+      <h2 class="sec-headline">Pertanyaan umum.</h2>
+    </div>
+    <div class="faq-list reveal" id="faqList">
+      <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Bagaimana NaviKarier menghitung skill gap saya?</span><span class="faq-plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Kami menggunakan taxonomy skills industri yang dikurasi dari ribuan job listing Indonesia. Setiap skill punya bobot. Gap dihitung secara matematis: bukan AI prediction, tapi kalkulasi berbasis data.</div></div></div>
+      <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Apakah hasilnya akurat?</span><span class="faq-plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Seakurat data yang kamu input. Taxonomy dikurasi manual dari job listings real. Semakin jujur kamu mengisi level skill, semakin akurat hasilnya.</div></div></div>
+      <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Apa bedanya dengan LinkedIn Skills Assessment?</span><span class="faq-plus">+</span></button><div class="faq-a"><div class="faq-a-inner">LinkedIn test per skill satu per satu. NaviKarier melihat keseluruhan profil kamu vs standar role yang kamu tuju &mdash; lalu prioritaskan skill mana yang paling menggerakkan peluang.</div></div></div>
+      <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Apakah data saya aman?</span><span class="faq-plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Demo berjalan sepenuhnya di browser. Tidak ada data yang dikirim ke server. Untuk Pro dengan CV upload, data dienkripsi dan tidak dibagikan ke pihak ketiga.</div></div></div>
+      <div class="faq-item"><button class="faq-q" aria-expanded="false"><span>Industri apa saja yang tersedia?</span><span class="faq-plus">+</span></button><div class="faq-a"><div class="faq-a-inner">Technology, Business &amp; Finance, Marketing &amp; Creative, Human Resources, Operations, dan Keuangan &amp; Edukasi (OJK). Total 12+ roles.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="sec">
+  <div class="wrap">
+    <div class="contact-grid">
+      <div class="contact-info reveal">
+        <div class="badge"><span class="badge-dot" style="background:var(--accent)"></span> KONTAK</div>
+        <h3>Ada pertanyaan atau ingin partnership?</h3>
+        <p>Untuk demo enterprise, press, atau kolaborasi kampus &mdash; kami terbuka.</p>
+        <ul class="contact-list">
+          <li><span class="label">Email</span><span class="val"><a href="mailto:hello@navikarier.id">hello@navikarier.id</a></span></li>
+          <li><span class="label">Instagram</span><span class="val"><a href="https://instagram.com/navikarier" target="_blank" rel="noopener">@navikarier</a></span></li>
+          <li><span class="label">Lokasi</span><span class="val">Malang &amp; Surabaya, Indonesia</span></li>
+        </ul>
+      </div>
+      <form class="form reveal" id="contactForm" novalidate>
+        <div class="field"><label for="cf-name">Nama</label><input id="cf-name" name="name" type="text" required autocomplete="name" /></div>
+        <div class="field"><label for="cf-email">Email</label><input id="cf-email" name="email" type="email" required autocomplete="email" /></div>
+        <div class="field"><label for="cf-type">Tipe</label><select id="cf-type" name="type"><option>General</option><option>Enterprise</option><option>Press</option><option>Kampus</option></select></div>
+        <div class="field"><label for="cf-msg">Pesan</label><textarea id="cf-msg" name="message" rows="4" required></textarea></div>
+        <button type="submit" class="form-submit">Kirim Pesan &rarr;</button>
+        <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">NaviKarier</div>
+        <p class="tagline">Dari tebakan jadi data.</p>
+        <p class="copy">&copy; 2026 NaviKarier. Digdaya &times; Hackathon &mdash; BI &times; OJK.</p>
+      </div>
+      <div class="footer-col"><h5>Produk</h5><ul><li><a href="#features">Fitur</a></li><li><a href="#demo">Demo</a></li><li><a href="#pricing">Harga</a></li></ul></div>
+      <div class="footer-col"><h5>Perusahaan</h5><ul><li><a href="#dampak">Dampak</a></li><li><a href="#contact">Kontak</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Privasi</a></li><li><a href="#">Ketentuan</a></li></ul></div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const navToggle = document.getElementById('navToggle');
+const navDrawer = document.getElementById('navDrawer');
+navToggle.addEventListener('click', () => {
+  const open = navDrawer.classList.toggle('open');
+  navToggle.setAttribute('aria-expanded', String(open));
+});
+navDrawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  navDrawer.classList.remove('open'); navToggle.setAttribute('aria-expanded','false');
+}));
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach((el, i) => { el.style.transitionDelay = `${(i%3)*50}ms`; io.observe(el); });
+
+// DEMO
+const taxonomy = {
+  "frontend": { name:"Frontend Engineer", skills:[["JavaScript / TypeScript",80,0.18],["React / Next.js",75,0.16],["HTML / CSS / A11y",70,0.10],["State Management",65,0.08],["Testing",60,0.08],["Git",70,0.06],["API Integration",65,0.10],["Performance",60,0.08],["Problem Solving",75,0.10],["Communication",65,0.06]] },
+  "data": { name:"Data Analyst", skills:[["SQL (Window, CTE)",80,0.18],["Excel",75,0.10],["Python (pandas)",70,0.14],["Data Viz",70,0.12],["Statistics",65,0.10],["BI Tools",65,0.10],["Business Acumen",70,0.10],["Data Storytelling",65,0.08],["Communication",70,0.08]] },
+  "pm": { name:"Product Manager", skills:[["Product Discovery",75,0.14],["User Research",65,0.10],["Roadmapping",75,0.12],["Agile / Scrum",70,0.08],["Stakeholder Mgmt",75,0.10],["Analytics",70,0.12],["Technical Literacy",65,0.10],["Storytelling",70,0.10],["Strategic Thinking",75,0.14]] },
+  "marketing": { name:"Digital Marketing", skills:[["SEO",70,0.12],["Performance Ads",75,0.14],["Copywriting",70,0.12],["Analytics (GA4)",70,0.12],["Social Media",70,0.10],["Content Planning",65,0.10],["Email & CRM",65,0.08],["Brand",65,0.10],["Communication",70,0.12]] },
+  "hr": { name:"HR Generalist", skills:[["Recruitment",75,0.14],["Employee Relations",75,0.12],["Comp & Benefits",70,0.10],["HRIS",65,0.08],["Performance Mgmt",70,0.12],["L&D",70,0.10],["Labor Law",70,0.12],["Empathy",75,0.10],["Communication",75,0.12]] },
+  "ops": { name:"Supply Chain Analyst", skills:[["Inventory Mgmt",75,0.14],["Demand Forecasting",70,0.12],["Excel / PQ",75,0.10],["SQL",65,0.10],["ERP (SAP)",70,0.10],["Logistics",70,0.10],["Process Improvement",70,0.12],["Data Analysis",70,0.10],["Communication",70,0.12]] },
+  "finlit": { name:"Financial Literacy (OJK)", skills:[["Literasi Produk Keuangan",75,0.14],["Perencanaan Keuangan",70,0.12],["Analisis Risiko",70,0.12],["Regulasi BI/OJK",75,0.14],["Edukasi Publik",70,0.10],["Data Literacy",65,0.10],["Inklusi Digital",70,0.10],["Etika Konsumen",70,0.10],["Storytelling",70,0.08]] },
+};
+
+const roleListEl=document.getElementById('roleList'), demoSkillsEl=document.getElementById('demoSkills');
+const demoScoreEl=document.getElementById('demoScore'), demoVerdictEl=document.getElementById('demoVerdict');
+const levelPick=document.getElementById('levelPick');
+let activeRole='frontend', activeLevel='junior';
+const levelMods={junior:0.55,mid:0.82,senior:1.05};
+
+Object.entries(taxonomy).forEach(([id,role])=>{
+  const btn=document.createElement('button'); btn.textContent=role.name; btn.dataset.id=id;
+  if(id===activeRole) btn.classList.add('active');
+  btn.addEventListener('click',()=>{
+    roleListEl.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); activeRole=id; renderDemo();
+  });
+  const li=document.createElement('li'); li.appendChild(btn); roleListEl.appendChild(li);
+});
+levelPick.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    levelPick.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); activeLevel=b.dataset.level; renderDemo();
+  });
+});
+
+function renderDemo(){
+  const role=taxonomy[activeRole], mod=levelMods[activeLevel];
+  demoSkillsEl.innerHTML=''; let weighted=0, totalW=0;
+  role.skills.forEach(([name,threshold,w])=>{
+    const seed=(name.length*13+activeLevel.length*7)%30;
+    const lv=Math.max(5,Math.min(100,Math.round(threshold*mod+(seed-15))));
+    const ratio=Math.min(lv/threshold,1); weighted+=ratio*w; totalW+=w;
+    const item=document.createElement('div'); item.className='demo-skill';
+    const r=lv/threshold; item.dataset.met=r>=1?'true':(r>=0.8?'medium':'false');
+    item.innerHTML=`<div class="demo-skill-head"><span class="demo-skill-name">${name}</span><span class="demo-skill-vals">${lv} / ${threshold}</span></div><div class="demo-skill-bar"><div class="demo-skill-fill" style="width:0%"></div></div>`;
+    demoSkillsEl.appendChild(item);
+    requestAnimationFrame(()=>{ item.querySelector('.demo-skill-fill').style.width=Math.min(100,lv)+'%'; });
+  });
+  const score=Math.round((weighted/totalW)*100);
+  const start=parseInt(demoScoreEl.textContent||'0',10), t0=performance.now(), dur=700;
+  function step(t){ const k=Math.min(1,(t-t0)/dur); demoScoreEl.textContent=Math.round(start+(score-start)*(1-Math.pow(1-k,3))); if(k<1)requestAnimationFrame(step); }
+  requestAnimationFrame(step);
+  if(score>=80)demoVerdictEl.textContent='Siap melamar';
+  else if(score>=60)demoVerdictEl.textContent='Hampir siap';
+  else if(score>=40)demoVerdictEl.textContent='Perlu pengembangan';
+  else demoVerdictEl.textContent='Banyak gap terbuka';
+}
+renderDemo();
+
+// FAQ
+document.querySelectorAll('.faq-item').forEach(item=>{
+  const q=item.querySelector('.faq-q'), a=item.querySelector('.faq-a');
+  q.addEventListener('click',()=>{
+    const open=item.classList.toggle('open');
+    q.setAttribute('aria-expanded',String(open));
+    a.style.maxHeight=open?a.scrollHeight+'px':'0px';
+  });
+});
+
+// FORM
+const form=document.getElementById('contactForm'), fStatus=document.getElementById('formStatus');
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const n=form.querySelector('#cf-name').value.trim(), em=form.querySelector('#cf-email').value.trim(), m=form.querySelector('#cf-msg').value.trim();
+  if(!n||!em||!m){ fStatus.style.color='var(--red)'; fStatus.textContent='Lengkapi semua field.'; return; }
+  fStatus.style.color='var(--green)'; fStatus.textContent='Terkirim. Kami balas dalam 24 jam.'; form.reset();
+});
+</script>
+</body>
+</html>
