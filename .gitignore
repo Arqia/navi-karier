@@ -56,5 +56,10 @@ Thumbs.db
 # Coverage
 coverage/
 
+# Claude Code (internal dev tooling — not public)
+CLAUDE.md
+.claudeignore
+.claude/
+
 # Misc
 *.pem
