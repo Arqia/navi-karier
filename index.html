@@ -19,7 +19,7 @@
     --ink-3: #555;
     --ink-dark: #111;
     --accent: #3b82f6;
-    --highlight: #d1f542;
+    --highlight: #ff6b6b;
     --border: rgba(255,255,255,0.08);
     --border-2: rgba(255,255,255,0.14);
     --red: #ef4444;
@@ -44,7 +44,7 @@
   }
   a { color: inherit; text-decoration: none; }
   button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-  ::selection { background: var(--highlight); color: #000; }
+  ::selection { background: var(--highlight); color: #fff; }
 
   .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); }
 
@@ -77,6 +77,7 @@
   .nav-btn.filled { background: var(--ink); color: #000; border-color: var(--ink); }
   .nav-btn.filled:hover { background: #ddd; }
   .nav-toggle { display: none; }
+  .nav-drawer { display: none; }
 
   @media (max-width: 880px) {
     .nav-links, .nav-right { display: none; }
@@ -139,7 +140,7 @@
     gap: 32px; flex-wrap: wrap;
   }
   .logos-row span {
-    font-size: 0.95rem; font-weight: 600; color: var(--ink-3);
+    font-size: 0.95rem; font-weight: 600; color: var(--ink-2);
     letter-spacing: -0.01em; white-space: nowrap;
   }
 
@@ -162,7 +163,8 @@
     line-height: 1.08; letter-spacing: -0.03em; margin: 0 0 24px;
     max-width: 800px;
   }
-  .hl { background: var(--highlight); color: #000; padding: 0 6px; }
+  .hl { background: var(--highlight); color: #000; padding: 2px 6px; }
+  .sec-light .hl { color: #fff; }
   .sec-sub {
     font-size: 1.05rem; color: var(--ink-2); max-width: 580px;
     line-height: 1.7; margin: 0;
@@ -306,7 +308,7 @@
     padding: 8px 14px; font-size: 0.82rem; font-weight: 500;
     border: 1px solid var(--border-2); color: var(--ink-2);
   }
-  .impact-flow-item.active { background: var(--highlight); color: #000; border-color: var(--highlight); }
+  .impact-flow-item.active { background: var(--highlight); color: #fff; border-color: var(--highlight); }
   .impact-flow-arrow { color: var(--ink-3); font-size: 0.9rem; }
 
   /* PRICING */
@@ -320,7 +322,7 @@
   .price-card.featured { border-color: var(--highlight); }
   .price-badge {
     position: absolute; top: -11px; left: 24px;
-    background: var(--highlight); color: #000; padding: 4px 12px;
+    background: var(--highlight); color: #fff; padding: 4px 12px;
     font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
   }
   .price-name { font-size: 1.1rem; font-weight: 600; margin: 0 0 16px; }
@@ -405,6 +407,90 @@
   .footer-col a { font-size: 0.88rem; color: var(--ink-2); transition: color 150ms; }
   .footer-col a:hover { color: var(--ink); }
 
+  /* HERO TEXT ROTATOR */
+  .hero-rotator {
+    display: inline-block; position: relative; overflow: hidden;
+    vertical-align: bottom;
+  }
+  .hero-rotator-word {
+    display: inline-block;
+    background: var(--highlight); color: #fff;
+    padding: 0 12px; position: relative;
+  }
+  .hero-rotator-inner {
+    display: inline-block;
+    transition: opacity 0.4s ease;
+  }
+
+  /* ANIMATED SHOWCASE CARDS */
+  .showcase { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; margin-top: 64px; }
+  @media (max-width: 960px) { .showcase { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 560px) { .showcase { grid-template-columns: 1fr; } }
+  .scard {
+    background: var(--bg-card); border: 1px solid var(--border); padding: 24px;
+    display: flex; flex-direction: column;
+  }
+  .scard-title {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em;
+    color: var(--ink-3); text-transform: uppercase; margin-bottom: 20px;
+  }
+  .scard-visual { flex: 1; min-height: 180px; display: flex; align-items: flex-end; margin-bottom: 20px; position: relative; }
+  .scard-text { font-size: 0.88rem; line-height: 1.5; color: var(--ink-2); }
+  .scard-text b { font-weight: 700; color: var(--ink); }
+
+  /* Card 1: Skill bars — static, no looping */
+  .skill-bars { display: flex; align-items: flex-end; gap: 6px; width: 100%; height: 140px; }
+  .skill-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .skill-bar-fill {
+    width: 100%; border-radius: 2px 2px 0 0;
+    height: var(--h); transition: height 1s cubic-bezier(.2,.7,.2,1);
+  }
+  .skill-bar-fill.red { background: var(--red); }
+  .skill-bar-fill.amber { background: var(--amber); }
+  .skill-bar-fill.green { background: var(--green); }
+  .skill-bar-fill.accent { background: var(--accent); }
+  .skill-bar-label { font-family: var(--mono); font-size: 0.55rem; color: var(--ink-3); }
+
+  /* Card 2: Gap table — smooth highlight via JS */
+  .gap-table { width: 100%; font-family: var(--mono); font-size: 0.7rem; }
+  .gap-table-row {
+    display: grid; grid-template-columns: 1fr 60px 50px;
+    padding: 6px 8px; border-bottom: 1px solid var(--border);
+    color: var(--ink-3); transition: background 0.4s ease, color 0.4s ease;
+  }
+  .gap-table-row.hl-row { background: var(--accent); color: #fff; }
+  .gap-table-row:nth-child(1) .gap-val { color: var(--red); }
+  .gap-table-row:nth-child(2) .gap-val { color: var(--amber); }
+  .gap-table-row:nth-child(3) .gap-val { color: var(--green); }
+  .gap-table-row:nth-child(4) .gap-val { color: var(--red); }
+  .gap-table-row:nth-child(5) .gap-val { color: var(--amber); }
+  .gap-table-row.hl-row .gap-val { color: #fff; }
+
+  /* Card 3: Score gauge — smooth JS updates */
+  .gauge-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .gauge-ring {
+    width: 100px; height: 100px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 1.2s ease;
+  }
+  .gauge-inner { width: 76px; height: 76px; border-radius: 50%; background: var(--bg-card); display: flex; align-items: center; justify-content: center; }
+  .gauge-num { font-size: 1.4rem; font-weight: 800; }
+  .gauge-label { font-family: var(--mono); font-size: 0.6rem; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* Card 4: Line chart — draw once, no loop */
+  .line-chart { width: 100%; height: 120px; position: relative; }
+  .line-chart svg { width: 100%; height: 100%; }
+  .line-path {
+    fill: none; stroke: var(--accent); stroke-width: 2;
+    stroke-dasharray: 500; stroke-dashoffset: 500;
+    animation: drawLine 2.5s ease forwards;
+  }
+  .line-area { fill: url(#areaGrad); opacity: 0; animation: fadeArea 2.5s ease forwards; }
+  .line-dot { fill: var(--accent); }
+  @keyframes drawLine { to { stroke-dashoffset: 0; } }
+  @keyframes fadeArea { 60% { opacity: 0; } 100% { opacity: 0.25; } }
+  .chart-grid-line { stroke: rgba(255,255,255,0.04); stroke-width: 1; }
+
   /* REVEAL */
   .reveal { opacity: 0; transform: translateY(16px); transition: opacity 500ms, transform 500ms cubic-bezier(.2,.7,.2,1); }
   .reveal.in { opacity: 1; transform: none; }
@@ -444,7 +530,7 @@
 <section id="hero" class="hero">
   <div class="hero-noise"></div>
   <div class="wrap">
-    <h1 class="hero-headline reveal">Dari tebakan<br>jadi data.</h1>
+    <h1 class="hero-headline reveal">Dari tebakan<br>jadi <span class="hero-rotator"><span class="hero-rotator-word"><span class="hero-rotator-inner" id="heroWord">data.</span></span></span></h1>
     <p class="hero-sub reveal">NaviKarier menghitung gap antara skill kamu dan standar industri &mdash; matematis, bukan tebakan. Dalam 5 menit kamu tahu harus fokus kemana.</p>
     <div class="hero-ctas reveal">
       <a href="#demo" class="hero-btn primary">Analisa Sekarang</a>
@@ -476,16 +562,71 @@
         <p class="sec-sub">Upload CV atau input skill manual. Sistem menghitung gap vs standar industri menggunakan taxonomy yang dikurasi dari ribuan job listing Indonesia.</p>
       </div>
     </div>
-    <div class="cards-3 reveal">
-      <div class="card">
-        <h3><b>Skill Gap Analysis.</b> Upload CV atau input manual. Gap dihitung per-skill vs standar industri.</h3>
+    <div class="showcase reveal">
+
+      <div class="scard">
+        <div class="scard-title">Skill Levels</div>
+        <div class="scard-visual">
+          <div class="skill-bars">
+            <div class="skill-bar-col"><div class="skill-bar-fill red" style="--h:50%"></div><span class="skill-bar-label">JS</span></div>
+            <div class="skill-bar-col"><div class="skill-bar-fill amber" style="--h:65%"></div><span class="skill-bar-label">SQL</span></div>
+            <div class="skill-bar-col"><div class="skill-bar-fill green" style="--h:85%"></div><span class="skill-bar-label">Comm</span></div>
+            <div class="skill-bar-col"><div class="skill-bar-fill accent" style="--h:40%"></div><span class="skill-bar-label">PM</span></div>
+            <div class="skill-bar-col"><div class="skill-bar-fill red" style="--h:55%"></div><span class="skill-bar-label">Git</span></div>
+            <div class="skill-bar-col"><div class="skill-bar-fill amber" style="--h:70%"></div><span class="skill-bar-label">API</span></div>
+          </div>
+        </div>
+        <div class="scard-text"><b>Visualisasi skill.</b> Lihat posisi skill kamu vs standar industri secara real-time.</div>
       </div>
-      <div class="card">
-        <h3><b>Learning Path.</b> Roadmap belajar diprioritaskan by impact &mdash; bukan popularitas course.</h3>
+
+      <div class="scard">
+        <div class="scard-title">Gap Analysis</div>
+        <div class="scard-visual" style="align-items:stretch;">
+          <div class="gap-table" style="align-self:center;">
+            <div class="gap-table-row"><span>React</span><span class="gap-val">-35</span><span>gap</span></div>
+            <div class="gap-table-row"><span>SQL</span><span class="gap-val">-15</span><span>gap</span></div>
+            <div class="gap-table-row"><span>Communication</span><span class="gap-val">+5</span><span>met</span></div>
+            <div class="gap-table-row"><span>Problem Solving</span><span class="gap-val">-20</span><span>gap</span></div>
+            <div class="gap-table-row"><span>Testing</span><span class="gap-val">-10</span><span>gap</span></div>
+          </div>
+        </div>
+        <div class="scard-text"><b>Gap per-skill.</b> Setiap skill dihitung gap-nya vs threshold industri. Prioritas terlihat jelas.</div>
       </div>
-      <div class="card">
-        <h3><b>Industry Benchmark.</b> Data 12 role, 5+ industri, dikurasi dari job listings real Indonesia.</h3>
+
+      <div class="scard">
+        <div class="scard-title">Readiness Score</div>
+        <div class="scard-visual" style="align-items:center;justify-content:center;">
+          <div class="gauge-wrap">
+            <div class="gauge-ring">
+              <div class="gauge-inner"><span class="gauge-num" id="gaugeNum">47</span></div>
+            </div>
+            <span class="gauge-label">Industry Readiness</span>
+          </div>
+        </div>
+        <div class="scard-text"><b>Satu angka.</b> Readiness score menunjukkan seberapa siap kamu untuk role target.</div>
       </div>
+
+      <div class="scard">
+        <div class="scard-title">Progress 30 Hari</div>
+        <div class="scard-visual" style="align-items:stretch;">
+          <div class="line-chart">
+            <svg viewBox="0 0 200 80" preserveAspectRatio="none">
+              <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.4"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+              <line class="chart-grid-line" x1="0" y1="20" x2="200" y2="20"/>
+              <line class="chart-grid-line" x1="0" y1="40" x2="200" y2="40"/>
+              <line class="chart-grid-line" x1="0" y1="60" x2="200" y2="60"/>
+              <path class="line-area" d="M0,65 L33,55 L66,50 L100,40 L133,30 L166,25 L200,18 L200,80 L0,80 Z"/>
+              <path class="line-path" d="M0,65 L33,55 L66,50 L100,40 L133,30 L166,25 L200,18"/>
+              <circle class="line-dot" cx="0" cy="65"/><circle class="line-dot" cx="33" cy="55" style="animation-delay:0.3s"/>
+              <circle class="line-dot" cx="66" cy="50" style="animation-delay:0.6s"/><circle class="line-dot" cx="100" cy="40" style="animation-delay:0.9s"/>
+              <circle class="line-dot" cx="133" cy="30" style="animation-delay:1.2s"/><circle class="line-dot" cx="166" cy="25" style="animation-delay:1.5s"/>
+              <circle class="line-dot" cx="200" cy="18" style="animation-delay:1.8s"/>
+            </svg>
+          </div>
+        </div>
+        <div class="scard-text"><b>Track progress.</b> Lihat perkembangan readiness score kamu dari waktu ke waktu.</div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -689,6 +830,45 @@ const io = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
 }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.reveal').forEach((el, i) => { el.style.transitionDelay = `${(i%3)*50}ms`; io.observe(el); });
+
+// HERO WORD ROTATOR — smooth fade, 4s per word
+const heroWords = ['data.', 'kalkulasi.', 'aksi.', 'karier.'];
+const heroWordEl = document.getElementById('heroWord');
+let heroIdx = 0;
+setInterval(() => {
+  heroIdx = (heroIdx + 1) % heroWords.length;
+  heroWordEl.style.opacity = '0';
+  setTimeout(() => {
+    heroWordEl.textContent = heroWords[heroIdx];
+    heroWordEl.style.opacity = '1';
+  }, 400);
+}, 4000);
+
+// GAUGE — smooth slow update every 3s
+const gaugeRing = document.querySelector('.gauge-ring');
+const gaugeNum = document.getElementById('gaugeNum');
+let gaugeVal = 47;
+const gaugeTargets = [47, 53, 61, 58, 65, 52, 47];
+let gaugeStep = 0;
+function updateGauge() {
+  gaugeStep = (gaugeStep + 1) % gaugeTargets.length;
+  const target = gaugeTargets[gaugeStep];
+  const deg = Math.round((target / 100) * 360);
+  gaugeRing.style.background = `conic-gradient(var(--highlight) 0deg, var(--highlight) ${deg}deg, rgba(255,255,255,0.06) ${deg}deg)`;
+  gaugeNum.textContent = target;
+}
+updateGauge();
+setInterval(updateGauge, 3000);
+
+// GAP TABLE — smooth scan every 2.5s
+const gapRows = document.querySelectorAll('.gap-table-row');
+let gapIdx = 0;
+gapRows[0].classList.add('hl-row');
+setInterval(() => {
+  gapRows[gapIdx].classList.remove('hl-row');
+  gapIdx = (gapIdx + 1) % gapRows.length;
+  gapRows[gapIdx].classList.add('hl-row');
+}, 2500);
 
 // DEMO
 const taxonomy = {
